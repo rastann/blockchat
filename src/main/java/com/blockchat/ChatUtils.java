@@ -1,8 +1,9 @@
 package com.blockchat;
 
 import java.security.MessageDigest;
+import java.util.ArrayList;
 
-public class Utils {
+public class ChatUtils {
 
     public static String applySha256(String input) {
         try {
@@ -18,5 +19,29 @@ public class Utils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Boolean isConversationValid(int difficulty, ArrayList<Message> conversation) {
+        Message currentMessage;
+        Message previousMessage;
+        String hashTarget = new String(new char[difficulty]).replace('\0', '0');
+
+        for(int i=1; i < conversation.size(); i++) {
+            currentMessage = conversation.get(i);
+            previousMessage = conversation.get(i-1);
+            if(!currentMessage.getHash().equals(currentMessage.calculateHash()) ){
+                System.out.println("Current Hashes not equal");
+                return false;
+            }
+            if(!previousMessage.getHash().equals(currentMessage.getPreviousHash()) ) {
+                System.out.println("Previous Hashes not equal");
+                return false;
+            }
+            if(!currentMessage.getHash().substring( 0, difficulty).equals(hashTarget)) {
+                System.out.println("This block hasn't been mined");
+                return false;
+            }
+        }
+        return true;
     }
 }
